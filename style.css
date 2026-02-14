@@ -1,0 +1,54 @@
+body {
+    font-family: Arial, sans-serif;
+    background: #0f172a;
+    color: white;
+    margin: 0;
+}
+
+header {
+    padding: 20px;
+    background: #020617;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+#search {
+    padding: 8px;
+    border-radius: 6px;
+    border: none;
+}
+
+#papers-container {
+    padding: 20px;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+}
+
+.paper-card {
+    background: #1e293b;
+    padding: 15px;
+    border-radius: 10px;
+    transition: 0.2s;
+}
+
+.paper-card:hover {
+    transform: translateY(-5px);
+}
+
+.paper-title {
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.paper-summary {
+    margin-top: 10px;
+    color: #cbd5f5;
+}
+
+.paper-link {
+    margin-top: 10px;
+    display: inline-block;
+    color: #38bdf8;
+}
