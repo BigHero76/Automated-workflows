@@ -16,9 +16,11 @@ let papers = [
 function renderPapers(list) {
     container.innerHTML = "";
 
-    list.forEach(paper => {
+    list.forEach((paper, index) => {
         const card = document.createElement("div");
         card.className = "paper-card";
+        card.style.animation = `fadeIn 0.4s ease ${index * 0.05}s forwards`;
+        card.style.opacity = "0";
 
         card.innerHTML = `
             <div class="paper-title">${paper.title}</div>
@@ -31,6 +33,7 @@ function renderPapers(list) {
         container.appendChild(card);
     });
 }
+
 searchInput.addEventListener("input", () => {
     const value = searchInput.value.toLowerCase();
 
