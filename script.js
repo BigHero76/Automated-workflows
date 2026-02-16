@@ -1,4 +1,4 @@
-const container = document.getElementById("papers-container");
+*const container = document.getElementById("papers-container");
 const searchInput = document.getElementById("search");
 
 const modal = document.getElementById("modal");
@@ -9,7 +9,7 @@ const closeBtn = document.getElementById("close");
 
 let papers = [];
 
-/* ---------- LOAD PAPERS FROM N8N ---------- */
+/* n8n webhook */
 
 async function loadPapers(query = "ai") {
 
@@ -18,7 +18,6 @@ async function loadPapers(query = "ai") {
 
     try {
 
-        // ✅ Your n8n webhook
         const response = await fetch(
             `http://localhost:5678/webhook-test/papers?q=${encodeURIComponent(query)}`
         );
@@ -38,7 +37,7 @@ async function loadPapers(query = "ai") {
     }
 }
 
-/* ---------- RENDER ---------- */
+/*RENDER*/
 
 function renderPapers(list) {
     container.innerHTML = "";
