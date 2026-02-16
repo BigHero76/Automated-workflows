@@ -9,7 +9,7 @@ const closeBtn = document.getElementById("close");
 
 let papers = [];
 
-/* ---------- LOAD PAPERS FROM N8N ---------- */
+/* n8n webhook */
 
 async function loadPapers(query = "ai") {
 
@@ -18,7 +18,6 @@ async function loadPapers(query = "ai") {
 
     try {
 
-        // ✅ Your n8n webhook
         const response = await fetch(
             `http://localhost:5678/webhook-test/papers?q=${encodeURIComponent(query)}`
         );
@@ -38,7 +37,7 @@ async function loadPapers(query = "ai") {
     }
 }
 
-/* ---------- RENDER ---------- */
+/*RENDER*/
 
 function renderPapers(list) {
     container.innerHTML = "";
@@ -65,7 +64,6 @@ function renderPapers(list) {
     });
 }
 
-/* ---------- MODAL ---------- */
 
 function openModal(paper) {
     modalTitle.textContent = paper.title;
@@ -80,8 +78,6 @@ window.onclick = (e) => {
     if (e.target === modal) modal.classList.add("hidden");
 };
 
-/* ---------- SEARCH ---------- */
-/* Now search CALLS backend instead of filtering locally */
 
 let debounceTimer;
 
@@ -98,17 +94,22 @@ searchInput.addEventListener("input", () => {
     }, 500); // wait 0.5s before calling API
 });
 
+/* hajime */
 async function loadPapers() {
 
     container.innerHTML =
         `<div class="loading">Loading research papers...</div>`;
 
     try {
+
+        // 🔥 your n8n webhook URL
         const response = await fetch(
             "http://localhost:5678/webhook-test/papers"
         );
 
         const data = await response.json();
+
+        // arXiv structure → feed.entry
         const entries = data.feed.entry || [];
 
         papers = entries.map(paper => ({
