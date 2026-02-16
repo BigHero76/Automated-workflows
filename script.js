@@ -64,7 +64,6 @@ function renderPapers(list) {
     });
 }
 
-/* ---------- MODAL ---------- */
 
 function openModal(paper) {
     modalTitle.textContent = paper.title;
@@ -79,8 +78,6 @@ window.onclick = (e) => {
     if (e.target === modal) modal.classList.add("hidden");
 };
 
-/* ---------- SEARCH ---------- */
-/* Now search CALLS backend instead of filtering locally */
 
 let debounceTimer;
 
@@ -97,6 +94,6 @@ searchInput.addEventListener("input", () => {
     }, 500); // wait 0.5s before calling API
 });
 
-/* ---------- START ---------- */
+/* hajime */
 
 loadPapers();
