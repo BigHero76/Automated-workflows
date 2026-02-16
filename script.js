@@ -19,7 +19,7 @@ async function loadPapers(query = "transformer") {
     try {
 
         const response = await fetch(
-            `http://localhost:5678/webhook-test/papers?q=${encodeURIComponent(query)}`
+            `http://localhost:5678/webhook/papers?q=${encodeURIComponent(query)}`
         );
 
         const data = await response.json();
@@ -29,13 +29,23 @@ async function loadPapers(query = "transformer") {
         // arXiv XML → JSON structure
         const entries = data.feed?.entry || [];
 
-        papers = entries.map(paper => ({
-            title: paper.title,
-            summary: paper.summary,
-            link:
-                paper.link.find(l => l.title === "pdf")?.href ||
-                paper.link[0].href
-        }));
+        papers = entries.map(paper => {
+
+    const cleanSummary = paper.summary
+        .replace(/\n/g, " ")
+        .replace(/\s+/g, " ")
+        .trim()
+        .slice(0, 220) + "...";
+
+    return {
+        title: paper.title.trim(),
+        summary: cleanSummary,
+        link:
+            paper.link.find(l => l.title === "pdf")?.href ||
+            paper.link[0].href
+    };
+});
+
 
         renderPapers(papers);
 
