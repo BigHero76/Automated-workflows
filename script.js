@@ -1,38 +1,73 @@
 const container = document.getElementById("papers-container");
 const searchInput = document.getElementById("search");
 
-let papers = [
-    {
-        title: "Deep Reinforcement Learning for Trading",
-        summary: "This paper explores RL agents for market decision making.",
-        link: "https://arxiv.org"
-    },
-    {
-        title: "Transformer Models in Finance",
-        summary: "Using attention mechanisms to predict stock trends.",
-        link: "https://arxiv.org"
+const modal = document.getElementById("modal");
+const modalTitle = document.getElementById("modal-title");
+const modalSummary = document.getElementById("modal-summary");
+const modalLink = document.getElementById("modal-link");
+const closeBtn = document.getElementById("close");
+
+let papers = [];
+
+/* ---------- LOAD PAPERS ---------- */
+
+async function loadPapers() {
+
+    container.innerHTML =
+        `<div class="loading">Loading research papers...</div>`;
+
+    try {
+
+        // 👉 REPLACE THIS WITH YOUR N8N WEBHOOK LATER
+        const response = await fetch(
+            "https://mocki.io/v1/0f3c6bfa-0c44-4a3d-a3b7-5b2f1c5c1c4a"
+        );
+
+        papers = await response.json();
+        renderPapers(papers);
+
+    } catch (err) {
+        container.innerHTML =
+            `<div class="loading">Failed to load papers.</div>`;
     }
-];
+}
+
+/* ---------- RENDER ---------- */
+
 function renderPapers(list) {
     container.innerHTML = "";
 
-    list.forEach((paper, index) => {
+    list.forEach(paper => {
+
         const card = document.createElement("div");
         card.className = "paper-card";
-        card.style.animation = `fadeIn 0.4s ease ${index * 0.05}s forwards`;
-        card.style.opacity = "0";
 
         card.innerHTML = `
             <div class="paper-title">${paper.title}</div>
             <div class="paper-summary">${paper.summary}</div>
-            <a class="paper-link" href="${paper.link}" target="_blank">
-                Read Paper →
-            </a>
         `;
+
+        card.onclick = () => openModal(paper);
 
         container.appendChild(card);
     });
 }
+
+/*Modal Logic*/
+
+function openModal(paper) {
+    modalTitle.textContent = paper.title;
+    modalSummary.textContent = paper.summary;
+    modalLink.href = paper.link;
+    modal.classList.remove("hidden");
+}
+
+closeBtn.onclick = () => modal.classList.add("hidden");
+
+window.onclick = (e) => {
+    if (e.target === modal) modal.classList.add("hidden");
+};
+
 
 searchInput.addEventListener("input", () => {
     const value = searchInput.value.toLowerCase();
@@ -43,4 +78,6 @@ searchInput.addEventListener("input", () => {
 
     renderPapers(filtered);
 });
-renderPapers(papers);
+
+/*Start*/
+loadPapers();
