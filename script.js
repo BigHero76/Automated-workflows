@@ -19,18 +19,24 @@ async function loadPapers() {
     try {
 
         // 👉 REPLACE THIS WITH YOUR N8N WEBHOOK LATER
+        const searchInput = document.getElementById("search");
+
+searchInput.addEventListener("keypress", async (e) => {
+    if (e.key === "Enter") {
+
+        const query = searchInput.value;
+
         const response = await fetch(
-            "https://mocki.io/v1/0f3c6bfa-0c44-4a3d-a3b7-5b2f1c5c1c4a"
+            "http://localhost:5678/webhook-test/papers?q=" + encodeURIComponent(query)
         );
 
-        papers = await response.json();
-        renderPapers(papers);
+        const data = await response.json();
 
-    } catch (err) {
-        container.innerHTML =
-            `<div class="loading">Failed to load papers.</div>`;
+        console.log(data);
+        alert(data.message);
     }
-}
+});
+
 
 /* ---------- RENDER ---------- */
 
