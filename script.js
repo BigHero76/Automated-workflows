@@ -1,4 +1,4 @@
-*const container = document.getElementById("papers-container");
+const container = document.getElementById("papers-container");
 const searchInput = document.getElementById("search");
 
 const modal = document.getElementById("modal");
