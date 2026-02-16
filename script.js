@@ -9,39 +9,45 @@ const closeBtn = document.getElementById("close");
 
 let papers = [];
 
-/* ---------- LOAD PAPERS ---------- */
+/* ---------- LOAD PAPERS FROM N8N ---------- */
 
-async function loadPapers() {
+async function loadPapers(query = "ai") {
 
     container.innerHTML =
         `<div class="loading">Loading research papers...</div>`;
 
     try {
 
-        // 👉 REPLACE THIS WITH YOUR N8N WEBHOOK LATER
-        const searchInput = document.getElementById("search");
-
-searchInput.addEventListener("keypress", async (e) => {
-    if (e.key === "Enter") {
-
-        const query = searchInput.value;
-
+        // ✅ Your n8n webhook
         const response = await fetch(
-            "http://localhost:5678/webhook-test/papers?q=" + encodeURIComponent(query)
+            `http://localhost:5678/webhook-test/papers?q=${encodeURIComponent(query)}`
         );
 
         const data = await response.json();
 
-        console.log(data);
-        alert(data.message);
-    }
-});
+        // expecting: { papers: [...] }
+        papers = data.papers || [];
 
+        renderPapers(papers);
+
+    } catch (error) {
+        console.error(error);
+
+        container.innerHTML =
+            `<div class="loading">Failed to load papers ❌</div>`;
+    }
+}
 
 /* ---------- RENDER ---------- */
 
 function renderPapers(list) {
     container.innerHTML = "";
+
+    if (list.length === 0) {
+        container.innerHTML =
+            `<div class="loading">No papers found</div>`;
+        return;
+    }
 
     list.forEach(paper => {
 
@@ -59,7 +65,7 @@ function renderPapers(list) {
     });
 }
 
-/*Modal Logic*/
+/* ---------- MODAL ---------- */
 
 function openModal(paper) {
     modalTitle.textContent = paper.title;
@@ -74,16 +80,24 @@ window.onclick = (e) => {
     if (e.target === modal) modal.classList.add("hidden");
 };
 
+/* ---------- SEARCH ---------- */
+/* Now search CALLS backend instead of filtering locally */
+
+let debounceTimer;
 
 searchInput.addEventListener("input", () => {
-    const value = searchInput.value.toLowerCase();
 
-    const filtered = papers.filter(p =>
-        p.title.toLowerCase().includes(value)
-    );
+    clearTimeout(debounceTimer);
 
-    renderPapers(filtered);
+    debounceTimer = setTimeout(() => {
+        const query = searchInput.value.trim();
+
+        if (query.length > 0) {
+            loadPapers(query);
+        }
+    }, 500); // wait 0.5s before calling API
 });
 
-/*Start*/
+/* ---------- START ---------- */
+
 loadPapers();
