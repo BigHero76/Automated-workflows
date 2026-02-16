@@ -9,9 +9,9 @@ const closeBtn = document.getElementById("close");
 
 let papers = [];
 
-/* n8n webhook */
+/* ---------- LOAD PAPERS FROM N8N ---------- */
 
-async function loadPapers(query = "ai") {
+async function loadPapers(query = "transformer") {
 
     container.innerHTML =
         `<div class="loading">Loading research papers...</div>`;
@@ -24,8 +24,18 @@ async function loadPapers(query = "ai") {
 
         const data = await response.json();
 
-        // expecting: { papers: [...] }
-        papers = data.papers || [];
+        console.log("Webhook data:", data);
+
+        // arXiv XML → JSON structure
+        const entries = data.feed?.entry || [];
+
+        papers = entries.map(paper => ({
+            title: paper.title,
+            summary: paper.summary,
+            link:
+                paper.link.find(l => l.title === "pdf")?.href ||
+                paper.link[0].href
+        }));
 
         renderPapers(papers);
 
@@ -37,12 +47,13 @@ async function loadPapers(query = "ai") {
     }
 }
 
-/*RENDER*/
+/* ---------- RENDER ---------- */
 
 function renderPapers(list) {
+
     container.innerHTML = "";
 
-    if (list.length === 0) {
+    if (!list.length) {
         container.innerHTML =
             `<div class="loading">No papers found</div>`;
         return;
@@ -64,6 +75,7 @@ function renderPapers(list) {
     });
 }
 
+/* ---------- MODAL ---------- */
 
 function openModal(paper) {
     modalTitle.textContent = paper.title;
@@ -78,6 +90,7 @@ window.onclick = (e) => {
     if (e.target === modal) modal.classList.add("hidden");
 };
 
+/* ---------- SEARCH (DEBOUNCED) ---------- */
 
 let debounceTimer;
 
@@ -87,44 +100,12 @@ searchInput.addEventListener("input", () => {
 
     debounceTimer = setTimeout(() => {
         const query = searchInput.value.trim();
-
         if (query.length > 0) {
             loadPapers(query);
         }
-    }, 500); // wait 0.5s before calling API
+    }, 500);
 });
 
 /* hajime */
-async function loadPapers() {
 
-    container.innerHTML =
-        `<div class="loading">Loading research papers...</div>`;
-
-    try {
-
-        // 🔥 your n8n webhook URL
-        const response = await fetch(
-            "http://localhost:5678/webhook-test/papers"
-        );
-
-        const data = await response.json();
-
-        // arXiv structure → feed.entry
-        const entries = data.feed.entry || [];
-
-        papers = entries.map(paper => ({
-            title: paper.title,
-            summary: paper.summary,
-            link: paper.link.find(l => l.title === "pdf")?.href
-                   || paper.link[0].href
-        }));
-
-        renderPapers(papers);
-
-    } catch (err) {
-        container.innerHTML =
-            `<div class="loading">Failed to load papers</div>`;
-        console.error(err);
-    }
-}
-
+loadPapers();
