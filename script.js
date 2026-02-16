@@ -100,4 +100,36 @@ searchInput.addEventListener("input", () => {
 
 /* ---------- START ---------- */
 
-loadPapers();
+async function loadPapers() {
+
+    container.innerHTML =
+        `<div class="loading">Loading research papers...</div>`;
+
+    try {
+
+        // 🔥 your n8n webhook URL
+        const response = await fetch(
+            "http://localhost:5678/webhook-test/papers"
+        );
+
+        const data = await response.json();
+
+        // arXiv structure → feed.entry
+        const entries = data.feed.entry || [];
+
+        papers = entries.map(paper => ({
+            title: paper.title,
+            summary: paper.summary,
+            link: paper.link.find(l => l.title === "pdf")?.href
+                   || paper.link[0].href
+        }));
+
+        renderPapers(papers);
+
+    } catch (err) {
+        container.innerHTML =
+            `<div class="loading">Failed to load papers</div>`;
+        console.error(err);
+    }
+}
+
