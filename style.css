@@ -284,3 +284,40 @@ body {
     min-height: 20px;
     text-align: center;
 }
+
+/* LOADING */
+.loading {
+    text-align: center;
+    padding: 40px;
+    color: #94a3b8;
+}
+
+/* MODAL */
+
+.modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.hidden {
+    display: none;
+}
+
+.modal-content {
+    background: #020617;
+    padding: 30px;
+    border-radius: 14px;
+    width: 600px;
+    max-width: 90%;
+    border: 1px solid rgba(255,255,255,0.1);
+}
+
+#close {
+    float: right;
+    cursor: pointer;
+    font-size: 22px;
+}
