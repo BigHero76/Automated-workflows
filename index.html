@@ -3,10 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 <title>Research Digest</title>
-<link rel="stylesheet" href="style.css">
 
+<link rel="stylesheet" href="style.css">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
 </head>
 
@@ -14,15 +13,25 @@
 
 <nav class="navbar">
     <h1>🧠 Research Digest</h1>
-    <input type="text" id="search" placeholder="Search papers...">
+    <input id="search" placeholder="Search papers...">
 </nav>
 
 <section class="hero">
-    <h2>Your AI-Powered Research Feed</h2>
-    <p>Latest papers summarized automatically.</p>
+    <h2>AI Research Feed</h2>
+    <p>Automatically summarized research papers</p>
 </section>
 
 <main id="papers-container"></main>
+
+<!-- MODAL -->
+<div id="modal" class="modal hidden">
+    <div class="modal-content">
+        <span id="close">&times;</span>
+        <h2 id="modal-title"></h2>
+        <p id="modal-summary"></p>
+        <a id="modal-link" target="_blank">Read Full Paper →</a>
+    </div>
+</div>
 
 <script src="script.js"></script>
 </body>
