@@ -98,23 +98,17 @@ searchInput.addEventListener("input", () => {
     }, 500); // wait 0.5s before calling API
 });
 
-/* ---------- START ---------- */
-
 async function loadPapers() {
 
     container.innerHTML =
         `<div class="loading">Loading research papers...</div>`;
 
     try {
-
-        // 🔥 your n8n webhook URL
         const response = await fetch(
             "http://localhost:5678/webhook-test/papers"
         );
 
         const data = await response.json();
-
-        // arXiv structure → feed.entry
         const entries = data.feed.entry || [];
 
         papers = entries.map(paper => ({
