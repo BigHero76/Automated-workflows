@@ -11,7 +11,7 @@ async function searchPapers() {
 
   try {
     const response = await fetch("http://localhost:5678/webhook/papers", {
-      method: "POST",
+      method: "GET",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ query })
     });
