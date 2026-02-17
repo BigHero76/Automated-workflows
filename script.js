@@ -1,3 +1,4 @@
+console.log("JS LOADED");
 const searchInput = document.getElementById("searchInput");
 const searchBtn = document.getElementById("searchBtn");
 
