@@ -1,123 +1,60 @@
-const container = document.getElementById("papers-container");
-const searchInput = document.getElementById("search");
+const searchInput = document.getElementById("searchInput");
+const searchBtn = document.getElementById("searchBtn");
 
-const modal = document.getElementById("modal");
-const modalTitle = document.getElementById("modal-title");
-const modalSummary = document.getElementById("modal-summary");
-const modalLink = document.getElementById("modal-link");
-const closeBtn = document.getElementById("close");
+let currentResults = [];
 
-let papers = [];
+searchBtn.addEventListener("click", searchPapers);
 
-/* ---------- LOAD PAPERS FROM N8N ---------- */
+async function searchPapers() {
+  const query = searchInput.value.trim();
 
-async function loadPapers(query = "transformer") {
+  if (!query) return;
 
-    container.innerHTML =
-        `<div class="loading">Loading research papers...</div>`;
+  const response = await fetch("http://localhost:5678/webhook/papers", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ query })
+  });
 
-    try {
+  const data = await response.json();
 
-        const response = await fetch(
-            `http://localhost:5678/webhook/papers?q=${encodeURIComponent(query)}`
-        );
+  const entries = data.feed?.entry || [];
 
-        const data = await response.json();
+  currentResults = entries.map(paper => ({
+    id: paper.id,
+    title: paper.title.replace(/\n/g, " ").trim(),
+    summary: paper.summary.replace(/\n/g, " ").trim().slice(0, 220) + "...",
+    link:
+      paper.link.find(l => l.title === "pdf")?.href ||
+      paper.link[0].href
+  }));
 
-        console.log("Webhook data:", data);
-
-        const entries = data.feed?.entry || [];
-
-        papers = entries.map(paper => {
-
-    const cleanSummary = paper.summary
-        .replace(/\n/g, " ")
-        .replace(/\s+/g, " ")
-        .trim()
-        .slice(0, 220) + "...";
-
-    return {
-        title: paper.title.trim(),
-        summary: cleanSummary,
-        link:
-            paper.link.find(l => l.title === "pdf")?.href ||
-            paper.link[0].href
-    };
-});
-
-
-        renderPapers(papers);
-
-    } catch (error) {
-        console.error(error);
-
-        container.innerHTML =
-            `<div class="loading">Failed to load papers ❌</div>`;
-    }
+  renderResults();
+  renderSaved();
+  renderRecent();
 }
 
-/* ---------- RENDER ---------- */
+function renderResults() {
+  const container = document.getElementById("results");
+  container.innerHTML = "";
 
-function renderPapers(list) {
+  currentResults.forEach(paper => {
+    const card = document.createElement("div");
+    card.className = "paper-card";
 
-    container.innerHTML = "";
+    card.innerHTML = `
+      <div class="paper-title" onclick="openPaper('${paper.link}', '${paper.id}')">
+        ${paper.title}
+      </div>
+      <div class="paper-summary">${paper.summary}</div>
+      <button class="small-btn" onclick="savePaper('${paper.id}')">
+        Save for Later
+      </button>
+    `;
 
-    if (!list.length) {
-        container.innerHTML =
-            `<div class="loading">No papers found</div>`;
-        return;
-    }
-
-    list.forEach(paper => {
-
-        const card = document.createElement("div");
-        card.className = "paper-card";
-
-        card.innerHTML = `
-            <div class="paper-title">${paper.title}</div>
-            <div class="paper-summary">${paper.summary}</div>
-        `;
-
-        card.onclick = () => openModal(paper);
-
-        container.appendChild(card);
-    });
+    container.appendChild(card);
+  });
 }
-
-/* ---------- MODAL ---------- */
-
-function openModal(paper) {
-    modalTitle.textContent = paper.title;
-    modalSummary.textContent = paper.summary;
-    modalLink.href = paper.link;
-    modal.classList.remove("hidden");
-}
-
-closeBtn.onclick = () => modal.classList.add("hidden");
-
-window.onclick = (e) => {
-    if (e.target === modal) modal.classList.add("hidden");
-};
-
-/* ---------- SEARCH (DEBOUNCED) ---------- */
-
-let debounceTimer;
-
-searchInput.addEventListener("input", () => {
-
-    clearTimeout(debounceTimer);
-
-    debounceTimer = setTimeout(() => {
-        const query = searchInput.value.trim();
-        if (query.length > 0) {
-            loadPapers(query);
-        }
-    }, 500);
-});
-
-/* hajime */
-
-loadPapers();
 
 function savePaper(paperId) {
   let saved = JSON.parse(localStorage.getItem("savedPapers")) || [];
@@ -125,6 +62,75 @@ function savePaper(paperId) {
   if (!saved.includes(paperId)) {
     saved.push(paperId);
     localStorage.setItem("savedPapers", JSON.stringify(saved));
-    alert("Saved!");
   }
+
+  renderSaved();
+}
+
+function renderSaved() {
+  const savedIds = JSON.parse(localStorage.getItem("savedPapers")) || [];
+  const container = document.getElementById("savedPapers");
+  container.innerHTML = "";
+
+  savedIds.forEach(id => {
+    const paper = currentResults.find(p => p.id === id);
+    if (paper) {
+      const card = document.createElement("div");
+      card.className = "paper-card saved";
+
+      card.innerHTML = `
+        <div class="paper-title" onclick="openPaper('${paper.link}', '${paper.id}')">
+          ${paper.title}
+        </div>
+        <button class="small-btn" onclick="removeSaved('${paper.id}')">
+          Remove
+        </button>
+      `;
+
+      container.appendChild(card);
+    }
+  });
+}
+
+function removeSaved(paperId) {
+  let saved = JSON.parse(localStorage.getItem("savedPapers")) || [];
+  saved = saved.filter(id => id !== paperId);
+  localStorage.setItem("savedPapers", JSON.stringify(saved));
+  renderSaved();
+}
+
+function openPaper(url, paperId) {
+  let recent = JSON.parse(localStorage.getItem("recentPapers")) || [];
+
+  recent = recent.filter(id => id !== paperId);
+  recent.unshift(paperId);
+
+  if (recent.length > 5) recent.pop();
+
+  localStorage.setItem("recentPapers", JSON.stringify(recent));
+
+  renderRecent();
+  window.open(url, "_blank");
+}
+
+function renderRecent() {
+  const recentIds = JSON.parse(localStorage.getItem("recentPapers")) || [];
+  const container = document.getElementById("recentPapers");
+  container.innerHTML = "";
+
+  recentIds.forEach(id => {
+    const paper = currentResults.find(p => p.id === id);
+    if (paper) {
+      const card = document.createElement("div");
+      card.className = "paper-card recent";
+
+      card.innerHTML = `
+        <div class="paper-title">
+          ${paper.title}
+        </div>
+      `;
+
+      container.appendChild(card);
+    }
+  });
 }
