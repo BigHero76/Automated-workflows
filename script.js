@@ -10,37 +10,21 @@ async function searchPapers() {
   const query = searchInput.value.trim();
   if (!query) return;
 
-  try {
-    const response = await fetch("http://localhost:5678/webhook/papers", {
-      method: "GET",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ query })
-    });
+  const response = await fetch("http://localhost:5678/webhook/papers", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ query })
+  });
 
-    const data = await response.json();
+  const data = await response.json();
 
-    console.log("FULL RESPONSE:", data); // debug line
+  console.log("BACKEND RESPONSE:", data);
 
-    const entries = data.feed?.entry || [];
+  currentResults = data;
 
-    currentResults = entries.map(paper => {
-      return {
-        id: paper.id,
-        title: paper.title.replace(/\n/g, " ").trim(),
-        summary: paper.summary.replace(/\n/g, " ").trim().slice(0, 250) + "...",
-        link:
-          paper.link.find(l => l.title === "pdf")?.href ||
-          paper.link.find(l => l.rel === "alternate")?.href
-      };
-    });
-
-    renderResults();
-    renderSaved();
-    renderRecent();
-
-  } catch (err) {
-    console.error("ERROR:", err);
-  }
+  renderResults();
+  renderSaved();
+  renderRecent();
 }
 
 function renderResults() {
