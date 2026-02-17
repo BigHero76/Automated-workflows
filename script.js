@@ -118,3 +118,13 @@ searchInput.addEventListener("input", () => {
 /* hajime */
 
 loadPapers();
+
+function savePaper(paperId) {
+  let saved = JSON.parse(localStorage.getItem("savedPapers")) || [];
+
+  if (!saved.includes(paperId)) {
+    saved.push(paperId);
+    localStorage.setItem("savedPapers", JSON.stringify(saved));
+    alert("Saved!");
+  }
+}
