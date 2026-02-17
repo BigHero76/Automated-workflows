@@ -11,18 +11,35 @@
 
 <body>
 
-<nav class="navbar">
-    <h1>🧠 Research Digest</h1>
-    <input id="search" placeholder="Search papers...">
-</nav>
+<header class="header">
+    <h1>🌿 Research Journal</h1>
+    <p class="subtitle">A calm space to explore and track research</p>
+</header>
 
-<section class="hero">
-    <h2>AI Research Feed</h2>
-    <p>Automatically summarized research papers</p>
-</section>
+<main class="container">
 
-<main id="papers-container"></main>
+    <section class="search-section">
+        <input id="search" placeholder="Search research topics...">
+    </section>
 
+    <section class="section">
+        <h2>✨ Latest Papers</h2>
+        <div id="latest-container" class="card-grid"></div>
+    </section>
+
+    <section class="section">
+        <h2>📖 Recently Read</h2>
+        <div id="recent-container" class="horizontal-scroll"></div>
+    </section>
+
+    <section class="section">
+        <h2>⭐ Saved For Later</h2>
+        <div id="saved-container" class="card-list"></div>
+    </section>
+
+</main>
+
+<!-- MODAL -->
 <div id="modal" class="modal hidden">
     <div class="modal-content">
         <span id="close">&times;</span>
@@ -33,5 +50,5 @@
 </div>
 
 <script src="script.js"></script>
+
 </body>
-</html>
