@@ -26,7 +26,6 @@ async function loadPapers(query = "transformer") {
 
         console.log("Webhook data:", data);
 
-        // arXiv XML → JSON structure
         const entries = data.feed?.entry || [];
 
         papers = entries.map(paper => {
