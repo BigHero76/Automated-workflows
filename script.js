@@ -7,31 +7,39 @@ searchBtn.addEventListener("click", searchPapers);
 
 async function searchPapers() {
   const query = searchInput.value.trim();
-
   if (!query) return;
 
-  const response = await fetch("http://localhost:5678/webhook/papers", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ query })
-  });
+  try {
+    const response = await fetch("http://localhost:5678/webhook/papers", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ query })
+    });
 
-  const data = await response.json();
+    const data = await response.json();
 
-  const entries = data.feed?.entry || [];
+    console.log("FULL RESPONSE:", data); // debug line
 
-  currentResults = entries.map(paper => ({
-    id: paper.id,
-    title: paper.title.replace(/\n/g, " ").trim(),
-    summary: paper.summary.replace(/\n/g, " ").trim().slice(0, 220) + "...",
-    link:
-      paper.link.find(l => l.title === "pdf")?.href ||
-      paper.link[0].href
-  }));
+    const entries = data.feed?.entry || [];
 
-  renderResults();
-  renderSaved();
-  renderRecent();
+    currentResults = entries.map(paper => {
+      return {
+        id: paper.id,
+        title: paper.title.replace(/\n/g, " ").trim(),
+        summary: paper.summary.replace(/\n/g, " ").trim().slice(0, 250) + "...",
+        link:
+          paper.link.find(l => l.title === "pdf")?.href ||
+          paper.link.find(l => l.rel === "alternate")?.href
+      };
+    });
+
+    renderResults();
+    renderSaved();
+    renderRecent();
+
+  } catch (err) {
+    console.error("ERROR:", err);
+  }
 }
 
 function renderResults() {
