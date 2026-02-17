@@ -1,219 +1,44 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>AI Research Reader</title>
-  <style>
-    body {
-      font-family: 'Inter', sans-serif;
-      background-color: #f4f7f4;
-      color: #2f3e2f;
-      padding: 40px;
-      max-width: 900px;
-      margin: auto;
-    }
 
-    h1 {
-      color: #3a5a40;
-    }
-
-    h2 {
-      margin-top: 40px;
-      color: #3a5a40;
-    }
-
-    input {
-      padding: 10px;
-      width: 70%;
-      border-radius: 8px;
-      border: 1px solid #ccc;
-    }
-
-    button {
-      padding: 10px 16px;
-      border-radius: 8px;
-      border: none;
-      background-color: #588157;
-      color: white;
-      cursor: pointer;
-      margin-left: 8px;
-    }
-
-    button:hover {
-      background-color: #3a5a40;
-    }
-
-    .paper-card {
-      background: white;
-      border-radius: 12px;
-      padding: 16px;
-      margin-top: 16px;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.05);
-      transition: 0.2s ease;
-    }
-
-    .paper-card:hover {
-      transform: translateY(-4px);
-    }
-
-    .saved {
-      border-left: 4px solid #588157;
-    }
-
-    .recent {
-      border-left: 4px solid #a3b18a;
-    }
-
-    .paper-title {
-      font-weight: bold;
-      cursor: pointer;
-      color: #3a5a40;
-    }
-
-    .paper-title:hover {
-      text-decoration: underline;
-    }
-
-    .small-btn {
-      background: #a3b18a;
-      margin-top: 8px;
-    }
-  </style>
+  <link rel="stylesheet" href="style.css">
 </head>
-
 <body>
 
-<h1>AI Research Reader</h1>
+  <header class="header">
+      <h1>🌿 AI Research Reader</h1>
+      <p class="subtitle">A calm space to explore and track research</p>
+  </header>
 
-<input id="searchInput" placeholder="Search papers..." />
-<button onclick="searchPapers()">Search</button>
+  <main class="container">
 
-<h2>Search Results</h2>
-<div id="results"></div>
+      <section class="search-section">
+          <input id="searchInput" placeholder="Search research papers...">
+          <button id="searchBtn">Search</button>
+      </section>
 
-<h2>Saved for Later</h2>
-<div id="savedPapers"></div>
+      <section>
+          <h2>✨ Search Results</h2>
+          <div id="results"></div>
+      </section>
 
-<h2>Recently Read</h2>
-<div id="recentPapers"></div>
+      <section>
+          <h2>⭐ Saved for Later</h2>
+          <div id="savedPapers"></div>
+      </section>
 
-<script>
+      <section>
+          <h2>📖 Recently Read</h2>
+          <div id="recentPapers"></div>
+      </section>
 
-let currentResults = [];
+  </main>
 
-async function searchPapers() {
-  const query = document.getElementById("searchInput").value;
-
-  const response = await fetch("http://localhost:5678/webhook/papers", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ query })
-  });
-
-  const data = await response.json();
-  currentResults = data;
-
-  renderResults(data);
-  renderSaved();
-  renderRecent();
-}
-
-function renderResults(papers) {
-  const container = document.getElementById("results");
-  container.innerHTML = "";
-
-  papers.forEach(paper => {
-    container.innerHTML += `
-      <div class="paper-card">
-        <div class="paper-title" onclick="openPaper('${paper.link}', '${paper.id}')">
-          ${paper.title}
-        </div>
-        <p>${paper.summary}</p>
-        <button class="small-btn" onclick="savePaper('${paper.id}')">
-          Save for Later
-        </button>
-      </div>
-    `;
-  });
-}
-
-function savePaper(paperId) {
-  let saved = JSON.parse(localStorage.getItem("savedPapers")) || [];
-
-  if (!saved.includes(paperId)) {
-    saved.push(paperId);
-    localStorage.setItem("savedPapers", JSON.stringify(saved));
-  }
-
-  renderSaved();
-}
-
-function renderSaved() {
-  const savedIds = JSON.parse(localStorage.getItem("savedPapers")) || [];
-  const container = document.getElementById("savedPapers");
-  container.innerHTML = "";
-
-  savedIds.forEach(id => {
-    const paper = currentResults.find(p => p.id === id);
-    if (paper) {
-      container.innerHTML += `
-        <div class="paper-card saved">
-          <div class="paper-title" onclick="openPaper('${paper.link}', '${paper.id}')">
-            ${paper.title}
-          </div>
-          <button class="small-btn" onclick="removeSaved('${paper.id}')">
-            Remove
-          </button>
-        </div>
-      `;
-    }
-  });
-}
-
-function removeSaved(paperId) {
-  let saved = JSON.parse(localStorage.getItem("savedPapers")) || [];
-  saved = saved.filter(id => id !== paperId);
-  localStorage.setItem("savedPapers", JSON.stringify(saved));
-  renderSaved();
-}
-
-function openPaper(url, paperId) {
-  let recent = JSON.parse(localStorage.getItem("recentPapers")) || [];
-
-  recent = recent.filter(id => id !== paperId);
-  recent.unshift(paperId);
-
-  if (recent.length > 5) {
-    recent.pop();
-  }
-
-  localStorage.setItem("recentPapers", JSON.stringify(recent));
-
-  renderRecent();
-  window.open(url, "_blank");
-}
-
-function renderRecent() {
-  const recentIds = JSON.parse(localStorage.getItem("recentPapers")) || [];
-  const container = document.getElementById("recentPapers");
-  container.innerHTML = "";
-
-  recentIds.forEach(id => {
-    const paper = currentResults.find(p => p.id === id);
-    if (paper) {
-      container.innerHTML += `
-        <div class="paper-card recent">
-          <div class="paper-title">
-            ${paper.title}
-          </div>
-        </div>
-      `;
-    }
-  });
-}
-
-</script>
-
+  <script src="script.js"></script>
 </body>
 </html>
 
